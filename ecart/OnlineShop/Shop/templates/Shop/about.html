@@ -1,0 +1,131 @@
+{% extends 'shop/basic.html' %}
+
+{% block title%} About Us{% endblock %}
+{% block body %}
+
+
+
+
+<main role="main">
+
+  <!-- Main jumbotron for a primary marketing message or call to action -->
+  <div class="jumbotron">
+    <div class="container">
+      <h1 class="display-3">Online Shopping Store</h1>
+      <p>Online Shopping Store Pvt Ltd. Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga ipsam laborum doloremque eum ratione nam pariatur laudantium, natus, accusantium, tenetur saepe maxime asperiores officiis autem dolorem. Labore possimus libero dolores pariatur odio doloribus at architecto minima, blanditiis ipsum modi accusamus consectetur saepe adipisci, magni deleniti. Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci quaerat delectus beatae cum asperiores unde consequuntur eum illum repellat, ab blanditiis esse, laudantium minus tempora vitae architecto, consequatur veritatis natus sed. Et possimus, recusandae atque ab id officiis unde, porro quaerat vitae nulla quam, ea cupiditate sed dolor fuga quisquam eos accusantium reiciendis! Earum inventore commodi amet laborum maiores voluptas?
+      </p>
+      <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more »</a></p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Example row of columns -->
+    <div class="row">
+      <div class="col-md-4">
+        <h2>Heading</h2>
+        <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+        <p><a class="btn btn-secondary" href="#" role="button">View details »</a></p>
+      </div>
+      <div class="col-md-4">
+        <h2>Heading</h2>
+        <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+        <p><a class="btn btn-secondary" href="#" role="button">View details »</a></p>
+      </div>
+      <div class="col-md-4">
+        <h2>Heading</h2>
+        <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+        <p><a class="btn btn-secondary" href="#" role="button">View details »</a></p>
+      </div>
+    </div>
+
+    <hr>
+
+  </div> <!-- /container -->
+
+</main>
+
+
+
+
+
+{% endblock %}
+
+
+{% block js %}
+
+<script>
+
+  // Find out the cart items from localStorage
+  if (localStorage.getItem('cart') == null) {
+      var cart = {};
+    } else {
+      cart = JSON.parse(localStorage.getItem('cart'));
+      updateCart(cart);
+    }
+    
+
+    
+      $(document).ready(function() {
+        $('#popcart').popover({
+            trigger: 'click'
+        });
+    
+        $('#popcart').on('shown.bs.popover', function () {
+            $('.popover').one('click', function () {
+                $(this).popover('hide');
+            });
+        });
+      });
+        function updatePopover(cart) {
+            var popStr = "";
+            
+            popStr = popStr + "<h5> Cart for your items in my shopping cart </h5><div class='mx-2 my-2'>";
+            var i = 1;
+            for (var productID in cart) {
+                var product = cart[productID]; // Access product details array
+                popStr += "<b>" + i + "</b>. " + product[1].slice(0, 19) + "...Qty: " + product[0]  + "<br>";
+                i++;
+            }
+            
+            popStr = popStr + "</div> <a href='/Shop/checkout'><button class='btn btn-primary' id ='checkout'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()' id ='clearCart'>Clear Cart</button>     "
+            document.getElementById('popcart').setAttribute('data-content', popStr);
+            $('#popcart').popover('show');
+        }
+    
+        updatePopover(cart);
+  
+    
+        function clearCart() {
+          cart = JSON.parse(localStorage.getItem("cart"));
+          localStorage.clear();
+          cart = {};
+          updateCart(cart);
+          updateCartUI(); // Update UI elements without reloading
+        }
+      
+        function updateCartUI() {
+          // Logic to update cart display on all relevant pages
+          // This could involve triggering events, updating DOM elements, etc.
+          // Example:
+          const cartElements = document.querySelectorAll('#popcart');
+          cartElements.forEach(element => {
+            element.innerHTML = `Cart(${Object.keys(cart).length})`;
+          });
+        }
+    
+    
+    function updateCart(cart) {
+      var sum = 0;
+      for (var item in cart) {
+        sum = sum + cart[item][0];
+       
+    }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      document.getElementById('cart').innerHTML = sum;
+      updatePopover(cart);
+    }
+    
+  </script>
+
+
+{% endblock %}

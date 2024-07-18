@@ -1,0 +1,125 @@
+{% extends "Shop/basic.html" %} {% block body %}
+<div class="container mt-3">
+  <form action="" method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input type="name" class="form-control" id="name" name="name" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Email address</label>
+      <input type="email" class="form-control" id="email" name="email" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="phone" class="form-label">Mobile Number</label>
+      <input type="tel" class="form-control" id="phone" name="phone" required onkeypress="onlyNumbers(event)" />
+    </div>
+
+    <div data-mdb-input-init class="form-outline">
+      <label class="form-label" for="desc">Message</label>
+      <textarea class="form-control" id="desc" name="desc" rows="4" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+  </form>
+</div>
+{% endblock %} 
+
+{%block js%}
+
+<script>
+  function onlyNumbers(event) {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+    }
+  }
+</script>
+
+<script>
+  {% if thank %}
+  alert('Thanks for contacting us. We wil get back to you soon!');
+  document.location = "/Shop/contact";
+  {%endif%}
+</script>
+<script>
+  // Find out the cart items from localStorage
+  if (localStorage.getItem("cart") == null) {
+    var cart = {};
+  } else {
+    cart = JSON.parse(localStorage.getItem("cart"));
+    updateCart(cart);
+  }
+
+  $(document).ready(function () {
+    $("#popcart").popover({
+      trigger: "click",
+    });
+
+    $("#popcart").on("shown.bs.popover", function () {
+      $(".popover").one("click", function () {
+        $(this).popover("hide");
+      });
+    });
+  });
+  function updatePopover(cart) {
+    var popStr = "";
+
+    popStr =
+      popStr +
+      "<h5> Cart for your items in my shopping cart </h5><div class='mx-2 my-2'>";
+    var i = 1;
+    for (var productID in cart) {
+      var product = cart[productID]; // Access product details array
+      popStr +=
+        "<b>" +
+        i +
+        "</b>. " +
+        product[1].slice(0, 19) +
+        "...Qty: " +
+        product[0] +
+        "<br>";
+      i++;
+    }
+
+    popStr =
+      popStr +
+      "</div> <a href='/Shop/checkout'><button class='btn btn-primary' id ='checkout'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()' id ='clearCart'>Clear Cart</button>     ";
+    document.getElementById("popcart").setAttribute("data-content", popStr);
+    $("#popcart").popover("show");
+  }
+
+  updatePopover(cart);
+
+  function clearCart() {
+    cart = JSON.parse(localStorage.getItem("cart"));
+    localStorage.clear();
+    cart = {};
+    updateCart(cart);
+    updateCartUI(); // Update UI elements without reloading
+  }
+
+  function updateCartUI() {
+    // Logic to update cart display on all relevant pages
+    // This could involve triggering events, updating DOM elements, etc.
+    // Example:
+    const cartElements = document.querySelectorAll('#popcart');
+    cartElements.forEach(element => {
+      element.innerHTML = `Cart(${Object.keys(cart).length})`;
+    });
+  }
+
+  function updateCart(cart) {
+    var sum = 0;
+    for (var item in cart) {
+      sum = sum + cart[item][0];
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    document.getElementById("cart").innerHTML = sum;
+    updatePopover(cart);
+  }
+</script>
+
+{% endblock %}

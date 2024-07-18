@@ -1,0 +1,92 @@
+
+{% extends "Shop/basic.html" %}
+
+{% block title %}Online Shopping Store - Home Page{% endblock %}
+
+{% block body %}
+
+<div class="container">
+  <div class="px-4 py-5 my-5 text-center">
+    <img class="d-block mx-auto" src="/media/Shop/images/django.png" alt="django-logo" width="150" height="150">
+    <h1 class="display-5 fw-bold text-body-emphasis">Online Shopping Store</h1>
+    <div class="col-lg-6 mx-auto">
+      <p class="lead mb-4">This e-commerce website was developed as a college project. The backend utilizes the Django framework and SQLite database for efficient data management.  Bootstrap was employed on the front end to ensure a responsive user interface.</p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <a href="/Shop/"><button type="button" class="btn btn-primary btn-lg px-4 gap-3">Visit</button></a>
+      </div>
+    </div>
+  </div>
+</div>
+   
+{% endblock %}
+
+{% block js %}
+
+<script>
+  // Find out the cart items from localStorage
+  if (localStorage.getItem("cart") == null) {
+    var cart = {};
+  } else {
+    cart = JSON.parse(localStorage.getItem("cart"));
+    updateCart(cart);
+  }
+
+  $(document).ready(function () {
+    $("#popcart").popover({
+      trigger: "click",
+    });
+
+    $("#popcart").on("shown.bs.popover", function () {
+      $(".popover").one("click", function () {
+        $(this).popover("hide");
+      });
+    });
+  });
+  function updatePopover(cart) {
+    var popStr = "";
+
+    popStr =
+      popStr +
+      "<h5> Cart for your items in my shopping cart </h5><div class='mx-2 my-2'>";
+    var i = 1;
+    for (var productID in cart) {
+      var product = cart[productID]; // Access product details array
+      popStr +=
+        "<b>" +
+        i +
+        "</b>. " +
+        product[1].slice(0, 19) +
+        "...Qty: " +
+        product[0] +
+        "<br>";
+      i++;
+    }
+
+    popStr =
+      popStr +
+      "</div> <a href='/Shop/checkout'><button class='btn btn-primary' id ='checkout'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()' id ='clearCart'>Clear Cart</button>     ";
+    document.getElementById("popcart").setAttribute("data-content", popStr);
+    $("#popcart").popover("show");
+  }
+
+  updatePopover(cart);
+
+  function clearCart() {
+    cart = JSON.parse(localStorage.getItem("cart"));
+    localStorage.clear();
+    cart = {};
+    updateCart(cart);
+  }
+
+  function updateCart(cart) {
+    var sum = 0;
+    for (var item in cart) {
+      sum = sum + cart[item][0];
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    document.getElementById("cart").innerHTML = sum;
+    updatePopover(cart);
+  }
+</script>
+
+{% endblock %}

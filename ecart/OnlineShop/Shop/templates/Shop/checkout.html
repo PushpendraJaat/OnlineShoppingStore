@@ -1,0 +1,240 @@
+{% extends "Shop/basic.html" %} 
+
+{% block title %} 
+Checkout - Online Shopping Store
+{% endblock %} 
+
+{% block body %}
+
+<div class="container my-3">
+  <div class="col">
+    <h4>Online Shopping Store Express Checkout - Review your cart Items</h4>
+    <ul class="list-group list-group-numbered my-4" id="items"></ul>
+    <ul class="breadcrumb mt-3">
+      <li class="breadcrumb-item active" aria-current="page">Your Cart Total Is <b>Rs.<span id="totalPrice"></b>  </span>Enter your details below & place your order. Thanks for using Online Shopping Store!</li>
+  </ul>
+  </div>
+  <div class="col my-4">
+    <h4>Enter Address & Other Details:</h4>
+
+    <form method="POST" action="/Shop/checkout/" >
+      {% csrf_token %}
+      <input type="hidden" name="itemsJson" id="itemsJson" />
+      <input type="hidden" name="amount" id="amount" />
+
+      <!-- Name input -->
+      <div data-mdb-input-init class="form-outline mb-4">
+        <input type="text" id="name" name="name" class="form-control" required/>
+        <label class="form-label" for="name">Name</label>
+      </div>
+
+      <!-- Email input -->
+      <div data-mdb-input-init class="form-outline mb-4">
+        <input type="email" id="email" name="email" class="form-control" required/>
+        <label class="form-label" for="email">Email</label>
+      </div>
+
+      <!-- Address input -->
+      <div data-mdb-input-init class="form-outline mb-4">
+        <input
+          type="text"
+          id="address1"
+          name="address1"
+          class="form-control"
+          required/>
+        <label class="form-label" for="address1">Address</label>
+      </div>
+
+      <!-- Address input -->
+      <div data-mdb-input-init class="form-outline mb-4">
+        <input
+          type="text"
+          id="address2"
+          name="address2"
+          class="form-control"
+          required/>
+        <label class="form-label" for="address2">Address Line 2</label>
+      </div>
+
+      <!-- Phone Number input -->
+      <div data-mdb-input-init class="form-outline mb-4">
+        <input type="tel" id="phone" name="phone" class="form-control" required/>
+        <label class="form-label" for="Phone">Phone</label>
+      </div>
+
+      <!-- 3 column grid layout with text inputs -->
+      <div class="row mb-4">
+        <div class="col">
+          <div data-mdb-input-init class="form-outline">
+            <input
+              type="text"
+              id="city"
+              name="city"
+              class="form-control"
+              required/>
+            <label class="form-label" for="city">City</label>
+          </div>
+        </div>
+        <div class="col">
+          <div data-mdb-input-init class="form-outline">
+            <input
+              type="text"
+              id="state"
+              name="state"
+              class="form-control"
+              required/>
+            <label class="form-label" for="state">State</label>
+          </div>
+        </div>
+        <div class="col">
+          <div data-mdb-input-init class="form-outline">
+            <input
+              type="text"
+              id="zip"
+              name="zip_code"
+              class="form-control"
+              required/>
+            <label class="form-label" for="Zip Code">Pin Code</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit button -->
+      <button
+        data-mdb-ripple-init
+        type="Submit"
+        class="btn btn-primary btn-block mb-4"
+      >
+        Place order
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %} {% block js %}
+
+<script>
+  if (localStorage.getItem("cart") == null) {
+    var cart = {};
+  } else {
+    cart = JSON.parse(localStorage.getItem("cart"));
+  }
+
+  //when cart is empty
+  var sum = 0;
+  var totalPrice = 0;
+  if ($.isEmptyObject(cart)) {
+    mystr = `<li
+    class="list-group-item d-flex justify-content-between align-items-start">
+    Your Cart is empty, please add some products to your cart before checking out!
+  </li>`;
+    $("#items").append(mystr);
+  } else {
+    for (item in cart) {
+      let name = cart[item][1];
+      let qty = cart[item][0];
+      let itemPrice = cart[item][2];
+      sum = sum + qty;
+      totalPrice = totalPrice + qty * itemPrice
+      mystr = `<li
+        class="list-group-item d-flex justify-content-between align-items-start">
+        ${name}
+        <span class="badge text-bg-primary rounded-pill">${qty}</span>
+      </li>`;
+      $("#items").append(mystr);
+    }
+  }
+  document.getElementById("cart").innerHTML = sum;
+  document.getElementById("totalPrice").innerHTML = totalPrice;
+  
+  
+  $('#itemsJson').val(JSON.stringify(cart));
+  {% if thank %}
+  alert('Thanks for ordering with us. Your order ID is {{id}}. Use it to track your order using our order tracker.');
+  localStorage.clear();
+  document.location ="/Shop";
+  {% endif %}
+
+  $('#amount').val($('#totalPrice').html())
+
+</script>
+
+<script>
+
+// Find out the cart items from localStorage
+if (localStorage.getItem('cart') == null) {
+  var cart = {};
+} else {
+  cart = JSON.parse(localStorage.getItem('cart'));
+  updateCart(cart);
+}
+
+
+
+  $(document).ready(function() {
+    $('#popcart').popover({
+        trigger: 'click'
+    });
+
+    $('#popcart').on('shown.bs.popover', function () {
+        $('.popover').one('click', function () {
+            $(this).popover('hide');
+        });
+    });
+  });
+    function updatePopover(cart) {
+        var popStr = "";
+        
+        popStr = popStr + "<h5> Cart for your items in my shopping cart </h5><div class='mx-2 my-2'>";
+        var i = 1;
+        for (var productID in cart) {
+            var product = cart[productID]; // Access product details array
+            popStr += "<b>" + i + "</b>. " + product[1].slice(0, 19) + "...Qty: " + product[0]  + "<br>";
+            i++;
+        }
+        
+        popStr = popStr + "</div> <a href='/Shop/checkout'><button class='btn btn-primary' id ='checkout'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()' id ='clearCart'>Clear Cart</button>     "
+        document.getElementById('popcart').setAttribute('data-content', popStr);
+        $('#popcart').popover('show');
+    }
+
+    updatePopover(cart);
+
+
+
+
+    function clearCart() {
+      cart = JSON.parse(localStorage.getItem("cart"));
+      localStorage.clear();
+      cart = {};
+      updateCart(cart);
+      updateCartUI(); // Update UI elements without reloading
+      location.reload();
+    }
+  
+    function updateCartUI() {
+      // Logic to update cart display on all relevant pages
+      // This could involve triggering events, updating DOM elements, etc.
+      // Example:
+      const cartElements = document.querySelectorAll('#popcart');
+      cartElements.forEach(element => {
+        element.innerHTML = `Cart(${Object.keys(cart).length})`;
+      });
+    }
+
+
+function updateCart(cart) {
+  var sum = 0;
+  for (var item in cart) {
+    sum = sum + cart[item][0];
+   
+}
+  localStorage.setItem('cart', JSON.stringify(cart));
+  document.getElementById('cart').innerHTML = sum;
+  updatePopover(cart);
+}
+
+
+</script>
+
+{% endblock %}
